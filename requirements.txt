@@ -1,0 +1,11 @@
+jupyterlab
+nbclient
+pandas
+importnb
+cvxopt
+matplotlib
+vedo
+numpy
+
+
+
