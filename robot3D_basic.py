@@ -157,6 +157,115 @@ def forward_kinematics(phi, L1, L2, L3, L4):
     return T_01, T_02, T_03, T_04, T_04[:-1,-1]
 
 
+class Arm:
+    def __init__(self, ax, f1, f2, f3, f4):
+        self.ax = ax
+        self.f1 = f1
+        self.f2 = f2
+        self.f3 = f3
+        self.f4 = f4
+
+    def unpack(self):
+        return [self.ax, self.f1, self.f2, self.f3, self.f4]
+
+def vid_runner(i):
+    phis = np.vstack([np.linspace(0, 30, 50), np.linspace(0, -50, 50), np.linspace(0, -30, 50), np.zeros(50)]).T
+    # Set the limits of the graph x, y, and z ranges 
+    axes = Axes(xrange=(0,20), yrange=(-2,10), zrange=(0,6))
+
+    # Lengths of arm parts 
+    L1 = 5   # Length of link 1
+    L2 = 8   # Length of link 2
+    L3 = 3
+    L4 = 0
+
+    # Joint angles 
+
+    T_01, T_02, T_03, T_04, e = forward_kinematics(phis[i], L1, L2, L3, L4)
+    # Create the coordinate frame mesh and transform
+    Frame1Arrows = createCoordinateFrameMesh()
+    
+    # Now, let's create a cylinder and add it to the local coordinate frame
+    r1 = 0.4
+    link1_mesh = Cylinder(r=0.4, 
+                          height=L1, 
+                          pos = (r1+L1/2,0,0),
+                          c="blue", 
+                          alpha=.8, 
+                          axis=(1,0,0)
+                          )
+    
+    # Also create a sphere to show as an example of a joint
+    sphere1 = Sphere(r=r1).pos(0,0,0).color("gray").alpha(.8)
+
+    # Combine all parts into a single object 
+    Frame1Arrows.apply_transform(T_01)  
+    link1_mesh.apply_transform(T_01)  
+    sphere1.apply_transform(T_01)  
+    Frame1 = Group((Frame1Arrows, link1_mesh, sphere1))
+
+    # Transform the part to position it at its correct location and orientation 
+    
+    # Create the coordinate frame mesh and transform
+    Frame2Arrows = createCoordinateFrameMesh()
+    sphere2 = Sphere(r=r1).pos(0,0,0).color("gray").alpha(.8)
+    # Now, let's create a cylinder and add it to the local coordinate frame
+    link2_mesh = Cylinder(r=0.4, 
+                          height=L2, 
+                          pos = (r1+L2/2,0,0),
+                          c="blue", 
+                          alpha=.8, 
+                          axis=(1,0,0)
+                          )
+
+    # Combine all parts into a single object 
+    Frame2Arrows.apply_transform(T_02)
+    link2_mesh.apply_transform(T_02)
+    sphere2.apply_transform(T_02)
+
+    Frame2 = Group((Frame2Arrows, link2_mesh, sphere2))
+
+    # Transform the part to position it at its correct location and orientation 
+    # Create the coordinate frame mesh and transform. This point is the end-effector. So, I am 
+    # just creating the coordinate frame. 
+    Frame3Arrows = createCoordinateFrameMesh()
+    sphere3 = Sphere(r=r1).pos(0,0,0).color("gray").alpha(.8)
+
+    # Now, let's create a cylinder and add it to the local coordinate frame
+    link3_mesh = Cylinder(r=0.4, 
+                          height=L3, 
+                          pos = (r1+L3/2,0,0),
+                          c="blue", 
+                          alpha=.8, 
+                          axis=(1,0,0)
+                          )
+    Frame3Arrows.apply_transform(T_03)
+    link3_mesh.apply_transform(T_03)
+    sphere3.apply_transform(T_03)
+    # Combine all parts into a single object 
+    Frame3 = Group((Frame3Arrows, link3_mesh, sphere3))
+
+    # Transform the part to position it at its correct location and orientation 
+    # Create the coordinate frame mesh and transform. This point is the end-effector. So, I am 
+    # just creating the coordinate frame. 
+    Frame4Arrows = createCoordinateFrameMesh()
+
+    # Transform the part to position it at its correct location and orientation 
+    Frame4Arrows.apply_transform(T_04) 
+    Frame4 = Frame4Arrows
+    
+    plt = Plotter()
+    plt += [axes, Frame1, Frame2, Frame3, Frame4]
+    plt.render()
+    plt.show(screenshot="".join(("pics/",str(i),".png"))).close()
+    
+    # Show everything 
+    # show([Frame1, Frame2, Frame3, Frame4], axes, viewup="z").close()
+    # show([Frame1Arrows], axes, viewup="z").close()
+
+
+
+
 def main():
 
     # Set the limits of the graph x, y, and z ranges 
@@ -172,7 +281,6 @@ def main():
     phi = np.array([30,-50,-30,0])
 
     T_01, T_02, T_03, T_04, e = forward_kinematics(phi, L1, L2, L3, L4)
-    print(e)
     # Create the coordinate frame mesh and transform
     Frame1Arrows = createCoordinateFrameMesh()
     
